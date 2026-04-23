@@ -416,11 +416,23 @@
       </div>
       <div class="field">
         <label>Consulta (R$)</label>
-        <input type="number" id="co_consulta" value="5.40" step="0.01" oninput="calc()">
+        <select id="co_consulta_sel" onchange="handleSelect('co_consulta_sel','co_consulta_custom','co_consulta')" style="margin-bottom:4px;">
+          <option value="5.86">Upper — R$ 5,86</option>
+          <option value="5.00">SkyMark — R$ 5,00</option>
+          <option value="outros">Outros</option>
+        </select>
+        <input type="number" id="co_consulta_custom" placeholder="Digite o valor" step="0.01" oninput="calc()" style="display:none;">
+        <input type="hidden" id="co_consulta" value="5.86">
       </div>
       <div class="field">
         <label>Cadastro / Pesquisa (R$)</label>
-        <input type="number" id="co_cadastro" value="27.00" step="0.01" oninput="calc()">
+        <select id="co_cadastro_sel" onchange="handleSelect('co_cadastro_sel','co_cadastro_custom','co_cadastro')" style="margin-bottom:4px;">
+          <option value="29.28">Upper — R$ 29,28</option>
+          <option value="15.00">SkyMark — R$ 15,00</option>
+          <option value="outros">Outros</option>
+        </select>
+        <input type="number" id="co_cadastro_custom" placeholder="Digite o valor" step="0.01" oninput="calc()" style="display:none;">
+        <input type="hidden" id="co_cadastro" value="29.28">
       </div>
       <div class="field">
         <label>Monitoramento (R$)</label>
@@ -495,7 +507,7 @@
       </div>
       <div class="result-item">
         <label>Margem Lucro (%)</label>
-        <input class="result-input" type="number" id="margemPct" value="9" step="0.1" oninput="calc()">
+        <input class="result-input" type="number" id="margemPct" value="10" step="0.1" oninput="calc()">
       </div>
       <div class="result-item">
         <label>IR + CSLL s/ Lucro (%)</label>
@@ -807,6 +819,16 @@ function calc(){
   document.getElementById('totalMotorista').value=fmt(totalMotorista);
 
   // CUSTOS OPERACIONAIS
+  // sync campos "outros" se estiver visível
+  const consulSel = document.getElementById('co_consulta_sel');
+  if(consulSel.value === 'outros'){
+    document.getElementById('co_consulta').value = parseFloat(document.getElementById('co_consulta_custom').value)||0;
+  }
+  const cadastroSel = document.getElementById('co_cadastro_sel');
+  if(cadastroSel.value === 'outros'){
+    document.getElementById('co_cadastro').value = parseFloat(document.getElementById('co_cadastro_custom').value)||0;
+  }
+
   const co_consulta=parseFloat(document.getElementById('co_consulta').value)||0;
   const co_cadastro=parseFloat(document.getElementById('co_cadastro').value)||0;
   const co_monitoramento=parseFloat(document.getElementById('co_monitoramento').value)||0;
@@ -901,6 +923,20 @@ function calc(){
   }
   // atualiza gráfico sempre que calc() roda
   if(typeof drawChart === 'function') drawChart();
+}
+
+function handleSelect(selId, customId, hiddenId){
+  const sel = document.getElementById(selId);
+  const custom = document.getElementById(customId);
+  const hidden = document.getElementById(hiddenId);
+  if(sel.value === 'outros'){
+    custom.style.display = 'block';
+    hidden.value = custom.value || '0';
+  } else {
+    custom.style.display = 'none';
+    hidden.value = sel.value;
+  }
+  calc();
 }
 
 // ═══════════════════════════
@@ -1103,6 +1139,12 @@ function resetForm(){
   document.getElementById('tempoRota').value='';
   document.getElementById('secTaxaBoleto').value='0';
   document.getElementById('secOutrasTaxas').value='0';
+  document.getElementById('co_consulta_sel').value = '5.86';
+  document.getElementById('co_consulta').value = '5.86';
+  document.getElementById('co_consulta_custom').style.display = 'none';
+  document.getElementById('co_cadastro_sel').value = '29.28';
+  document.getElementById('co_cadastro').value = '29.28';
+  document.getElementById('co_cadastro_custom').style.display = 'none';
   ['co_monitoramento','co_rastreamento','co_isca','co_descargas','co_comissoes','co_outras'].forEach(id=>{document.getElementById(id).value='0';});
   document.getElementById('hasSecuritizadora').checked=false;
   document.getElementById('isPF').checked=true;
