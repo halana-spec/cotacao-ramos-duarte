@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotação — Ramos Duarte Transportes</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#0d0f12; --surface:#13161b; --surface2:#1a1e25;
+    --border:#252b35; --border2:#2e3540;
+    --gold:#c9a84c; --gold2:#e8c97a;
+    --gold-dim:rgba(201,168,76,0.12); --gold-glow:rgba(201,168,76,0.25);
+    --text:#e8eaed; --text2:#8a92a0; --text3:#555e6e;
+    --green:#2ecc71; --green-dim:rgba(46,204,113,0.12);
+    --red:#e74c3c; --red-dim:rgba(231,76,60,0.12);
+    --blue:#4a90d9; --blue-dim:rgba(74,144,217,0.1);
+    --orange:#f39c12; --orange-dim:rgba(243,156,18,0.12);
+    --radius:8px; --radius2:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100vh;padding:24px 20px 60px;}
+
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+  .logo-area{display:flex;align-items:center;gap:14px;}
+  .logo-badge{width:46px;height:46px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#0d0f12;letter-spacing:1px;}
+  .logo-text h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold2);}
+  .logo-text p{font-size:11px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
+  .btn-reset{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;}
+  .btn-reset:hover{border-color:var(--red);color:var(--red);}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;}
+  .card-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card-header .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold-glow);}
+  .card-header h2{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold2);}
+  .card-header .badge{margin-left:auto;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--gold-dim);color:var(--gold2);letter-spacing:.5px;}
+  .card-body{padding:16px;}
+
+  .field-row{display:flex;gap:12px;margin-bottom:12px;}
+  .field-row:last-child{margin-bottom:0;}
+  .field{flex:1;}
+  .field label{display:block;font-size:10px;font-weight:500;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;}
+  .field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+  .field input:focus,.field select:focus{border-color:var(--gold);}
+  .field input[readonly]{color:var(--gold2);font-weight:500;background:var(--gold-dim);border-color:rgba(201,168,76,.2);cursor:default;}
+  .field input.ro-neutral{color:var(--text2);background:var(--bg);border-color:var(--border);font-size:12px;cursor:default;}
+  .field select option{background:#1a1e25;}
+  .hint{font-size:10px;color:var(--text3);margin-top:4px;}
+
+  /* MAPS */
+  .maps-input-wrap{position:relative;}
+  .maps-input-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none;transition:border-color .2s;}
+  .maps-input-wrap input:focus{border-color:var(--blue);}
+  .autocomplete-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);z-index:100;max-height:180px;overflow-y:auto;}
+  .ac-item{padding:8px 12px;font-size:12px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);}
+  .ac-item:last-child{border-bottom:none;}
+  .ac-item:hover{background:var(--gold-dim);color:var(--gold2);}
+  .btn-calc-route{padding:8px 18px;background:var(--blue-dim);border:1px solid rgba(74,144,217,.3);border-radius:var(--radius);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;}
+  .btn-calc-route:hover{background:rgba(74,144,217,.2);border-color:var(--blue);}
+  .btn-calc-route:disabled{opacity:.4;cursor:not-allowed;}
+  .route-status{font-size:11px;min-height:16px;}
+  .route-status.ok{color:var(--green);}
+  .route-status.err{color:var(--red);}
+  .route-status.loading{color:var(--text2);}
+
+  .piso-banner{background:linear-gradient(135deg,rgba(74,144,217,.08),rgba(74,144,217,.03));border:1px solid rgba(74,144,217,.2);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .piso-banner .label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;}
+  .piso-banner .valor{font-family:'DM Mono',monospace;font-size:20px;color:var(--blue);font-weight:500;}
+  .piso-banner .formula{font-size:10px;color:var(--text3);margin-top:2px;}
+  .piso-banner .right{text-align:right;}
+  .piso-banner .label2{font-size:10px;color:var(--text2);}
+  .piso-banner .diff{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;}
+  .diff.above{color:var(--green);}
+  .diff.below{color:var(--red);}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+  .toggle-label{font-size:12px;color:var(--text2);}
+  .toggle{position:relative;width:36px;height:20px;cursor:pointer;display:inline-block;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .toggle .slider{position:absolute;inset:0;background:var(--border2);border-radius:20px;transition:background .2s;}
+  .toggle .slider:before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s;}
+  .toggle input:checked+.slider{background:var(--gold-dim);border:1px solid var(--gold);}
+  .toggle input:checked+.slider:before{transform:translateX(16px);background:var(--gold);}
+
+  .divider{height:1px;background:var(--border);margin:12px 0;}
+
+  .results-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .analise-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .result-item{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;text-align:center;}
+  .result-item label{display:block;font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+  .result-item .value{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text);}
+  .result-item.hl-gold{background:var(--gold-dim);border-color:rgba(201,168,76,.3);}
+  .result-item.hl-gold .value{color:var(--gold2);font-size:16px;}
+
+  .tag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+  .tag-green{background:var(--green-dim);color:var(--green);}
+  .tag-gold{background:var(--gold-dim);color:var(--gold2);}
+  .tag-red{background:var(--red-dim);color:var(--red);}
+
+  .sec-box{background:var(--orange-dim);border:1px solid rgba(243,156,18,.2);border-radius:var(--radius);padding:12px 14px;margin-top:12px;}
+  .sec-box .sec-label{font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:.8px;}
+  .sec-box .sec-val{font-family:'DM Mono',monospace;font-size:20px;color:var(--orange);font-weight:500;margin-top:2px;}
+  .sec-box .sec-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+
+  .mt14{margin-top:14px;}
+  .mt10{margin-top:10px;}
+
+  .result-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--gold2);font-family:'DM Mono',monospace;font-size:14px;font-weight:500;text-align:center;padding:4px;outline:none;}
+  .result-input:focus{border-color:var(--gold);}
+  .result-input.neutral{color:var(--text);}
+
+  .footer{margin-top:32px;text-align:center;font-size:10px;color:var(--text3);letter-spacing:.5px;}
+  .chart-tab{padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;}
+  .chart-tab:hover{border-color:var(--gold);color:var(--gold);}
+  .chart-tab.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2);}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+  .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-badge">RD</div>
+    <div class="logo-text">
+      <h1>Ramos Duarte Transportes</h1>
+      <p>Calculadora de Cotação · Portaria SUROC Nº 4 / 20.03.2026</p>
+    </div>
+  </div>
+  <button class="btn-reset" onclick="resetForm()">↺ Limpar</button>
+</div>
+
+<!-- BLOCO 1: ROTA + ANTT -->
+<div class="grid">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="dot"></div>
+      <h2>Rota — Distância</h2>
+      <span class="badge">OpenStreetMap · OSRM</span>
+    </div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:8px;">
+        <label>Cidade de Origem</label>
+        <div class="maps-input-wrap">
+          <input type="text" id="origemInput" placeholder="Ex: Salvador, BA" oninput="autocomplete('origem',this.value)" autocomplete="off">
+          <div class="autocomplete-list" id="origemList" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Cidade de Destino</label>
+        <div class="maps-input-wrap">
+          <input type="text" id="destinoInput" placeholder="Ex: São Paulo, SP" oninput="autocomplete('destino',this.value)" autocomplete="off">
+          <div class="autocomplete-list" id="destinoList" style="display:none;"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+        <button class="btn-calc-route" id="btnRota" onclick="calcularRota()">⇢ Calcular Distância</button>
+        <span class="route-status" id="routeStatus"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="field-row">
+        <div class="field">
+          <label>KM da Rota</label>
+          <input type="number" id="km" placeholder="Auto ou manual" oninput="calc()">
+          <p class="hint">Editável manualmente se necessário</p>
+        </div>
+        <div class="field">
+          <label>Tempo Estimado</label>
+          <input type="text" id="tempoRota" readonly class="ro-neutral" placeholder="—">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="dot"></div>
+      <h2>Piso Mínimo ANTT</h2>
+      <span class="badge">Res. 6.076 / Portaria 4</span>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Tabela</label>
+          <select id="tabela" onchange="calc()">
+            <option value="A">A — Composição completa (cavalo + carreta)</option>
+            <option value="B">B — Só unidade de tração (cavalo)</option>
+            <option value="C">C — Alto desempenho, composição</option>
+            <option value="D">D — Alto desempenho, só tração</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Tipo de Carga</label>
+          <select id="tipoCarga" onchange="calc()">
+            <option value="0">Granel Sólido</option>
+            <option value="1">Granel Líquido</option>
+            <option value="2">Frigorificada / Aquecida</option>
+            <option value="3">Conteinerizada</option>
+            <option value="4" selected>Carga Geral</option>
+            <option value="5">Neogranel</option>
+            <option value="6">Perigosa — Granel Sólido</option>
+            <option value="7">Perigosa — Granel Líquido</option>
+            <option value="8">Perigosa — Frigorificada</option>
+            <option value="9">Perigosa — Conteinerizada</option>
+            <option value="10">Perigosa — Carga Geral</option>
+            <option value="11">Carga Granel Pressurizada</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nº de Eixos</label>
+          <select id="eixos" onchange="calc()">
+            <option value="2">2 eixos</option>
+            <option value="3">3 eixos</option>
+            <option value="4">4 eixos</option>
+            <option value="5" selected>5 eixos</option>
+            <option value="6">6 eixos</option>
+            <option value="7">7 eixos</option>
+            <option value="9">9 eixos</option>
+          </select>
+        </div>
+      </div>
+      <div class="piso-banner">
+        <div>
+          <div class="label">Piso Mínimo Legal</div>
+          <div class="valor" id="pisoValor">R$ —</div>
+          <div class="formula" id="pisoFormula">Informe KM e selecione tipo/eixos</div>
+        </div>
+        <div class="right">
+          <div class="label2">vs Frete Proposto</div>
+          <div class="diff" id="pisoDiff">—</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CCD (R$/km)</label>
+          <input type="text" id="ccd" readonly class="ro-neutral">
+        </div>
+        <div class="field">
+          <label>CC — Carga/Descarga (R$)</label>
+          <input type="text" id="cc" readonly class="ro-neutral">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BLOCO 2: SEGUROS + MOTORISTA -->
+<div class="grid mt14">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="dot"></div>
+      <h2>Seguros de Carga</h2>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Valor da Nota Fiscal (R$)</label>
+          <input type="number" id="valorNF" placeholder="Ex: 50000" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Taxa por seguro</label>
+          <input type="text" value="0,0003" readonly class="ro-neutral">
+          <p class="hint">Aplicada individualmente para cada cobertura</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Seguro Roubo (R$)</label>
+          <input type="text" id="seguroRoubo" readonly>
+          <p class="hint">0,0003 × Valor NF</p>
+        </div>
+        <div class="field">
+          <label>Seguro Acidente (R$)</label>
+          <input type="text" id="seguroAcidente" readonly>
+          <p class="hint">0,0003 × Valor NF</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Seguro Adicional / Viagem (R$)</label>
+          <input type="number" id="seguroAdicional" value="15" oninput="calc()">
+          <p class="hint">Nova cobertura — padrão R$ 15,00</p>
+        </div>
+        <div class="field">
+          <label>Total Seguros (R$)</label>
+          <input type="text" id="totalSeguros" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="dot"></div>
+      <h2>Frete Indicado — Motorista</h2>
+    </div>
+    <div class="card-body">
+      <div class="toggle-row">
+        <span class="toggle-label">Motorista é Pessoa Física (CPF)?</span>
+        <label class="toggle">
+          <input type="checkbox" id="isPF" checked onchange="calc()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="divider"></div>
+      <div class="field-row">
+        <div class="field">
+          <label>Consumo (km/l)</label>
+          <input type="number" id="consumo" value="2" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Preço Combustível (R$/l)</label>
+          <input type="number" id="precoCombustivel" value="7.00" step="0.01" oninput="calc()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Custo Combustível (R$)</label>
+          <input type="text" id="custoCombustivel" readonly class="ro-neutral">
+        </div>
+        <div class="field">
+          <label>Frete Indicado Motorista (R$)</label>
+          <input type="text" id="freteMotorista" readonly>
+          <p class="hint" id="hintFrete">Equivale ao piso ANTT</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Cont. Patronal — só PF (R$)</label>
+          <input type="text" id="contPatronal" readonly class="ro-neutral">
+          <p class="hint">(frete × 20%) × 20%</p>
+        </div>
+        <div class="field">
+          <label>Total Custo Motorista (R$)</label>
+          <input type="text" id="totalMotorista" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BLOCO 3: SECURITIZADORA -->
+<div class="card mt14">
+  <div class="card-header">
+    <div class="dot"></div>
+    <h2>Taxa Securitizadora — Antecipação de Recebível</h2>
+    <span class="badge">Opcional</span>
+  </div>
+  <div class="card-body">
+    <div class="toggle-row">
+      <span class="toggle-label">Haverá antecipação de recebível nesta operação?</span>
+      <label class="toggle">
+        <input type="checkbox" id="hasSecuritizadora" onchange="toggleSec()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="secBloco" style="opacity:.3;pointer-events:none;">
+      <p class="hint" style="margin:10px 0 12px;font-size:11px;color:var(--text2);">
+        As taxas abaixo são calculadas sobre o <strong style="color:var(--gold2)">Frete Proposto ao Cliente</strong>. O resultado mostra quanto você deixará de receber ao antecipar.
+      </p>
+      <div class="grid-3">
+        <div class="field">
+          <label>Taxa da Securitizadora (%)</label>
+          <input type="number" id="secTaxaPct" step="0.001" placeholder="Ex: 4.998" oninput="calc()">
+          <p class="hint">% aplicada sobre o valor total do frete</p>
+        </div>
+        <div class="field">
+          <label>Taxa de Boleto (R$)</label>
+          <input type="number" id="secTaxaBoleto" value="0" step="0.01" oninput="calc()">
+          <p class="hint">Custo fixo por boleto, se houver</p>
+        </div>
+        <div class="field">
+          <label>Outras Taxas Admin (R$)</label>
+          <input type="number" id="secOutrasTaxas" value="0" step="0.01" oninput="calc()">
+          <p class="hint">TED, cadastro, etc.</p>
+        </div>
+      </div>
+      <div class="sec-box">
+        <div class="sec-label">Total descontado ao antecipar este frete</div>
+        <div class="sec-val" id="secTotalDesc">R$ —</div>
+        <div class="sec-sub" id="secSubDetalhe">Preencha o frete proposto e as taxas acima</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCO 4: CUSTOS OPERACIONAIS -->
+<div class="card mt14">
+  <div class="card-header">
+    <div class="dot"></div>
+    <h2>Custos Operacionais</h2>
+  </div>
+  <div class="card-body">
+    <div class="grid-3">
+      <div class="field">
+        <label>Seguro de Carga (auto)</label>
+        <input type="text" id="co_seguro" readonly class="ro-neutral">
+      </div>
+      <div class="field">
+        <label>Frete Motorista (auto)</label>
+        <input type="text" id="co_frete" readonly class="ro-neutral">
+      </div>
+      <div class="field">
+        <label>Cont. Patronal (auto)</label>
+        <input type="text" id="co_patronal" readonly class="ro-neutral">
+      </div>
+      <div class="field">
+        <label>Consulta (R$)</label>
+        <input type="number" id="co_consulta" value="5.40" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Cadastro / Pesquisa (R$)</label>
+        <input type="number" id="co_cadastro" value="27.00" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Monitoramento (R$)</label>
+        <input type="number" id="co_monitoramento" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Rastr. / Checklist (R$)</label>
+        <input type="number" id="co_rastreamento" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Isca / Escolta (R$)</label>
+        <input type="number" id="co_isca" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Descargas (R$)</label>
+        <input type="number" id="co_descargas" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Comissões / Extras (R$)</label>
+        <input type="number" id="co_comissoes" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Outras Despesas (R$)</label>
+        <input type="number" id="co_outras" value="0" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>⚡ Custo Operacional Total</label>
+        <input type="text" id="custoOperacionalTotal" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCO 5: IMPOSTOS -->
+<div class="card mt14">
+  <div class="card-header">
+    <div class="dot"></div>
+    <h2>Impostos sobre Faturamento</h2>
+  </div>
+  <div class="card-body">
+    <div class="field-row" style="max-width:380px;">
+      <div class="field">
+        <label>PIS + COFINS (%)</label>
+        <input type="number" id="pisCofinsPct" value="9.25" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>ICMS (%)</label>
+        <input type="number" id="icmsPct" value="12" step="0.01" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Total Impostos (%)</label>
+        <input type="text" id="totalImpostosPct" readonly class="ro-neutral">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCO 6: RESULTADOS -->
+<div class="card mt14">
+  <div class="card-header">
+    <div class="dot"></div>
+    <h2>Resultados Finais</h2>
+    <span class="badge" id="lucratividadeBadge">—</span>
+  </div>
+  <div class="card-body">
+
+    <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">▸ Frete Ideal — pela margem desejada</p>
+    <div class="results-grid">
+      <div class="result-item">
+        <label>Custo Operacional</label>
+        <div class="value" id="r_custoOp">—</div>
+      </div>
+      <div class="result-item">
+        <label>Margem Lucro (%)</label>
+        <input class="result-input" type="number" id="margemPct" value="9" step="0.1" oninput="calc()">
+      </div>
+      <div class="result-item">
+        <label>IR + CSLL s/ Lucro (%)</label>
+        <input class="result-input neutral" type="number" id="ircsllPct" value="2.50" step="0.01" oninput="calc()">
+      </div>
+      <div class="result-item hl-gold">
+        <label>⚡ Frete Empresa Ideal</label>
+        <div class="value" id="r_freteEmpresa">—</div>
+      </div>
+      <div class="result-item">
+        <label>Rec. Líquido Ideal</label>
+        <div class="value" id="r_recLiquido">—</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">▸ Análise do Frete Proposto ao Cliente</p>
+    <div class="field-row" style="max-width:220px;margin-bottom:12px;">
+      <div class="field">
+        <label>Frete Proposto (R$)</label>
+        <input type="number" id="freteEmpresaManual" placeholder="Ex: 7200" oninput="calc()">
+      </div>
+    </div>
+    <div class="analise-grid">
+      <div class="result-item">
+        <label>Frete Proposto</label>
+        <div class="value" id="a_frete">—</div>
+      </div>
+      <div class="result-item">
+        <label>Custos da Operação</label>
+        <div class="value" id="a_custos">—</div>
+      </div>
+      <div class="result-item">
+        <label>IR + CSLL est.</label>
+        <div class="value" id="a_ircsll">—</div>
+      </div>
+      <div class="result-item">
+        <label>Impostos s/ Fat.</label>
+        <div class="value" id="a_impostos">—</div>
+      </div>
+      <div class="result-item">
+        <label>Desc. Securitizadora</label>
+        <div class="value" id="a_securitizadora">—</div>
+      </div>
+      <div class="result-item">
+        <label>Recebimento Líquido</label>
+        <div class="value" id="a_liquido">—</div>
+      </div>
+    </div>
+    <div class="mt10" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text2);">Lucratividade:</span>
+      <span id="a_lucPct" class="tag tag-gold">—</span>
+      <span id="a_pisoStatus" style="font-size:11px;"></span>
+    </div>
+
+  </div>
+</div>
+
+<!-- BLOCO 7: GRÁFICO -->
+<div class="card mt14" id="chartCard" style="display:none;">
+  <div class="card-header">
+    <div class="dot"></div>
+    <h2>Visualização da Cotação</h2>
+    <span class="badge" id="chartBadge">—</span>
+  </div>
+  <div class="card-body" style="padding:12px 16px;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="chart-tab active" onclick="setChartTab('composicao',this)">Composição</button>
+      <button class="chart-tab" onclick="setChartTab('barras',this)">Comparativo</button>
+      <button class="chart-tab" onclick="setChartTab('gauge',this)">Margem</button>
+    </div>
+    <div style="display:flex;gap:20px;align-items:center;">
+      <div style="flex:0 0 220px;height:220px;position:relative;">
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div id="chartLegend" style="flex:1;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Ramos Duarte Transportes · Uso interno · Portaria SUROC Nº 4 — 20/03/2026 · Res. ANTT 6.076/2026
+</div>
+
+<script>
+const EIXOS_MAP={2:0,3:1,4:2,5:3,6:4,7:5,9:6};
+const TAB_A=[
+  [[4.0338,444.84],[5.1660,533.36],[5.8464,576.59],[6.7381,642.10],[7.4408,656.76],[8.0855,792.30],[9.2662,877.83]],
+  [[4.1052,455.84],[5.2583,550.10],[5.9955,600.27],[6.9002,669.38],[7.6080,685.45],[8.2192,811.76],[9.4199,902.80]],
+  [[4.7442,502.29],[6.0679,601.96],[6.9216,663.16],[7.9337,732.07],[8.7563,745.94],[9.6471,949.16],[10.9629,1030.58]],
+  [null,[5.1397,526.13],[5.7767,557.42],[6.6765,625.16],[7.3776,639.38],[8.0832,791.67],[9.1859,855.76]],
+  [[4.0031,436.39],[5.1295,523.33],[5.8178,568.72],[6.7126,635.08],[7.4124,648.95],[8.1252,803.22],[9.2466,872.44]],
+  [[3.6028,436.39],[5.1281,522.93],[5.8441,575.96],[6.7126,635.08],[7.4124,648.95],[8.1252,803.22],[9.2466,872.44]],
+  [[4.7775,587.98],[5.9193,679.12],[6.6352,727.28],[7.5269,792.80],[8.2296,807.45],[8.8919,947.84],[10.0803,1035.49]],
+  [[4.8611,610.96],[6.0237,707.85],[6.7649,762.95],[7.6697,832.06],[8.3775,848.13],[9.0063,979.29],[10.2147,1072.44]],
+  [[5.3315,609.31],[6.6676,712.41],[7.5371,780.02],[8.5492,848.93],[9.3718,862.80],[10.2855,1072.32],[11.6113,1156.49]],
+  [null,[5.5109,623.38],[6.1835,659.60],[7.0832,727.35],[7.7843,741.56],[8.5076,898.70],[9.6180,964.90]],
+  [[4.3647,531.01],[5.5008,620.58],[6.2246,670.91],[7.1193,737.27],[7.8191,751.14],[8.5496,910.26],[9.6787,981.58]],
+  [null,null,null,[7.0646,731.90],[7.8089,757.99],null,[9.7697,1016.29]]
+];
+const TAB_B=[
+  [null,null,[5.2729,515.17],[5.9994,574.29],[6.6896,588.17],[7.1066,695.68],[7.9200,746.78]],
+  [null,null,[5.3358,515.17],[6.0623,574.29],[6.7525,588.17],[7.1695,695.68],[7.9829,746.78]],
+  [null,null,[6.2111,564.07],[7.0457,623.20],[7.8586,637.07],[8.2933,749.43],[9.2644,802.65]],
+  [null,null,[5.2729,515.17],[5.9994,574.29],[6.6896,588.17],[7.1066,695.68],[7.9200,746.78]],
+  [null,null,[5.2729,515.17],[5.9994,574.29],[6.6896,588.17],[7.1066,695.68],[7.9200,746.78]],
+  [null,null,[5.2729,515.17],[5.9994,574.29],[6.6896,588.17],[7.1066,695.68],[7.9200,746.78]],
+  [null,null,[6.0617,665.87],[6.7882,724.99],[7.4784,738.86],[7.9130,851.22],[8.7341,904.44]],
+  [null,null,[6.1053,677.85],[6.8318,736.97],[7.5220,750.84],[7.9566,863.20],[8.7777,916.42]],
+  [null,null,[6.8267,680.93],[7.6612,740.05],[8.4742,753.93],[8.9317,872.59],[9.9128,928.56]],
+  [null,null,[5.6796,617.35],[6.4062,676.48],[7.0963,690.35],[7.5310,802.71],[8.3521,855.93]],
+  [null,null,[5.6796,617.35],[6.4062,676.48],[7.0963,690.35],[7.5310,802.71],[8.3521,855.93]],
+  [null,null,null,[5.9994,574.29],[6.6896,588.17],null,[7.9200,746.78]]
+];
+const TAB_C=[
+  [[3.4369,168.42],[4.3858,191.28],[5.0084,207.68],[5.7474,221.79],[6.4159,224.95],[6.7870,261.12],[7.7868,282.59]],
+  [[3.4827,170.79],[4.4391,194.88],[5.1022,212.78],[5.8459,227.67],[6.5163,231.13],[6.8753,265.31],[7.8823,287.97]],
+  [[4.1215,198.62],[5.2426,225.01],[6.0096,247.41],[6.8611,262.25],[7.6513,265.24],[8.1234,318.08],[9.2734,339.58]],
+  [null,[4.3763,189.72],[4.9834,203.55],[5.7253,218.14],[6.3932,221.21],[6.7861,260.98],[7.7579,277.83]],
+  [[3.4259,166.60],[4.3727,189.11],[4.9981,205.98],[5.7382,220.28],[6.4057,223.27],[6.8012,263.47],[7.7797,281.43]],
+  [[3.0257,166.60],[4.3722,189.03],[5.0076,207.54],[5.7382,220.28],[6.4057,223.27],[6.8012,263.47],[7.7797,281.43]],
+  [[3.9550,217.08],[4.9142,241.63],[5.5737,261.22],[6.3127,275.34],[6.9812,278.50],[7.3713,317.80],[8.3794,340.64]],
+  [[3.9850,222.03],[4.9517,247.82],[5.6203,268.91],[6.3640,283.80],[7.0343,287.26],[7.4123,324.57],[8.4276,348.60]],
+  [[4.5997,244.84],[5.7343,273.44],[6.5188,299.98],[7.3703,314.83],[8.1605,317.82],[8.6573,374.73],[9.8181,398.01]],
+  [null,[4.6358,229.62],[5.2797,246.64],[6.0216,261.24],[6.6895,264.30],[7.1014,307.21],[8.0815,325.43]],
+  [[3.6750,204.81],[4.6321,229.02],[5.2945,249.08],[6.0346,263.37],[6.7020,266.36],[7.1165,309.70],[8.1033,329.02]],
+  [null,null,null,[5.8647,241.14],[6.5481,246.76],null,[7.9676,312.42]]
+];
+const TAB_D=[
+  [null,null,[4.5780,194.44],[5.1667,207.18],[5.8246,210.17],[6.0332,240.30],[6.7460,254.35]],
+  [null,null,[4.6409,194.44],[5.2296,207.18],[5.8875,210.17],[6.0961,240.30],[6.8089,254.35]],
+  [null,null,[5.5300,226.06],[6.2268,238.80],[7.0074,241.78],[7.2350,275.04],[8.1060,290.47]],
+  [null,null,[4.5780,194.44],[5.1667,207.18],[5.8246,210.17],[6.0332,240.30],[6.7460,254.35]],
+  [null,null,[4.5780,194.44],[5.1667,207.18],[5.8246,210.17],[6.0332,240.30],[6.7460,254.35]],
+  [null,null,[4.5780,194.44],[5.1667,207.18],[5.8246,210.17],[6.0332,240.30],[6.7460,254.35]],
+  [null,null,[5.1433,247.99],[5.7321,260.73],[6.3899,263.72],[6.6176,296.98],[7.3386,312.40]],
+  [null,null,[5.1590,250.57],[5.7477,263.31],[6.4056,266.30],[6.6332,299.56],[7.3542,314.98]],
+  [null,null,[6.0392,278.63],[6.7360,291.37],[7.5166,294.36],[7.7689,331.70],[8.6508,348.90]],
+  [null,null,[4.8743,237.54],[5.4631,250.28],[6.1209,253.27],[6.3486,286.53],[7.0696,301.95]],
+  [null,null,[4.8743,237.54],[5.4631,250.28],[6.1209,253.27],[6.3486,286.53],[7.0696,301.95]],
+  [null,null,null,[5.1667,207.18],[5.8246,210.17],null,[6.7460,254.35]]
+];
+const TABS={A:TAB_A,B:TAB_B,C:TAB_C,D:TAB_D};
+
+function fmt(v){
+  if(v===null||v===undefined||isNaN(v))return'—';
+  return'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function fmtPct(v){
+  if(v===null||isNaN(v))return'—';
+  return v.toFixed(2).replace('.',',')+' %';
+}
+
+// AUTOCOMPLETE
+let acTimers={origem:null,destino:null};
+let acCoords={origem:null,destino:null};
+
+async function autocomplete(field,val){
+  clearTimeout(acTimers[field]);
+  const listEl=document.getElementById(field+'List');
+  if(val.length<3){listEl.style.display='none';return;}
+  acTimers[field]=setTimeout(async()=>{
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=br&q=${encodeURIComponent(val)}`,{headers:{'Accept-Language':'pt-BR'}});
+      const data=await r.json();
+      if(!data.length){listEl.style.display='none';return;}
+      listEl.innerHTML='';
+      data.forEach(item=>{
+        const d=document.createElement('div');
+        d.className='ac-item';
+        d.textContent=item.display_name;
+        d.onclick=()=>{
+          document.getElementById(field+'Input').value=item.display_name;
+          acCoords[field]={lat:parseFloat(item.lat),lon:parseFloat(item.lon)};
+          listEl.style.display='none';
+        };
+        listEl.appendChild(d);
+      });
+      listEl.style.display='block';
+    }catch(e){listEl.style.display='none';}
+  },400);
+}
+
+async function calcularRota(){
+  const btn=document.getElementById('btnRota');
+  const status=document.getElementById('routeStatus');
+  const origemVal=document.getElementById('origemInput').value;
+  const destinoVal=document.getElementById('destinoInput').value;
+
+  // geocode se coords ainda não foram selecionadas no autocomplete
+  if(!acCoords.origem||!acCoords.destino){
+    if(!origemVal||!destinoVal){
+      status.className='route-status err';
+      status.textContent='Preencha origem e destino.';
+      return;
+    }
+    status.className='route-status loading';
+    status.textContent='Buscando coordenadas...';
+    try{
+      const [ro,rd]=await Promise.all([
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(origemVal)}`,{headers:{'Accept-Language':'pt-BR'}}),
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(destinoVal)}`,{headers:{'Accept-Language':'pt-BR'}})
+      ]);
+      const [d1,d2]=await Promise.all([ro.json(),rd.json()]);
+      if(!d1.length||!d2.length){status.className='route-status err';status.textContent='Cidade não encontrada.';return;}
+      acCoords.origem={lat:parseFloat(d1[0].lat),lon:parseFloat(d1[0].lon)};
+      acCoords.destino={lat:parseFloat(d2[0].lat),lon:parseFloat(d2[0].lon)};
+    }catch(e){status.className='route-status err';status.textContent='Erro ao geocodificar.';return;}
+  }
+
+  btn.disabled=true;
+  status.className='route-status loading';
+  status.textContent='Calculando rota...';
+
+  try{
+    const {lat:oLat,lon:oLon}=acCoords.origem;
+    const {lat:dLat,lon:dLon}=acCoords.destino;
+    const url=`https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=false`;
+    const r=await fetch(url);
+    const data=await r.json();
+    if(data.code!=='Ok'||!data.routes.length){
+      status.className='route-status err';
+      status.textContent='Não foi possível calcular a rota.';
+      btn.disabled=false;return;
+    }
+    const distKm=Math.round(data.routes[0].distance/1000);
+    const sec=data.routes[0].duration;
+    const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
+    document.getElementById('km').value=distKm;
+    document.getElementById('tempoRota').value=`${h}h ${m}min`;
+    status.className='route-status ok';
+    status.textContent=`✓ ${distKm} km · ${h}h ${m}min estimados`;
+    calc();
+  }catch(e){
+    status.className='route-status err';
+    status.textContent='Erro na API. Informe KM manualmente.';
+  }
+  btn.disabled=false;
+}
+
+document.addEventListener('click',e=>{
+  ['origem','destino'].forEach(f=>{
+    const inp=document.getElementById(f+'Input');
+    const lst=document.getElementById(f+'List');
+    if(inp&&!inp.contains(e.target))lst.style.display='none';
+  });
+});
+
+function toggleSec(){
+  const on=document.getElementById('hasSecuritizadora').checked;
+  document.getElementById('secBloco').style.opacity=on?'1':'0.3';
+  document.getElementById('secBloco').style.pointerEvents=on?'auto':'none';
+  calc();
+}
+
+function calc(){
+  const km=parseFloat(document.getElementById('km').value)||0;
+  const valorNF=parseFloat(document.getElementById('valorNF').value)||0;
+  const segAdicional=parseFloat(document.getElementById('seguroAdicional').value)||0;
+  const isPF=document.getElementById('isPF').checked;
+  const consumo=parseFloat(document.getElementById('consumo').value)||1;
+  const precoComb=parseFloat(document.getElementById('precoCombustivel').value)||0;
+  const hasSecuritizadora=document.getElementById('hasSecuritizadora').checked;
+  const pisCofinsPct=parseFloat(document.getElementById('pisCofinsPct').value)||0;
+  const icmsPct=parseFloat(document.getElementById('icmsPct').value)||0;
+  const margemPct=parseFloat(document.getElementById('margemPct').value)||0;
+  const ircsllPct=parseFloat(document.getElementById('ircsllPct').value)||0;
+  const freteManual=parseFloat(document.getElementById('freteEmpresaManual').value)||0;
+
+  // PISO ANTT
+  const tab=document.getElementById('tabela').value;
+  const tipo=parseInt(document.getElementById('tipoCarga').value);
+  const eixos=parseInt(document.getElementById('eixos').value);
+  const ei=EIXOS_MAP[eixos];
+  const tdata=TABS[tab];
+  let piso=0,ccd=0,cc=0,coefs=null;
+  if(ei!==undefined&&tdata[tipo])coefs=tdata[tipo][ei];
+  if(coefs&&km>0){
+    ccd=coefs[0];cc=coefs[1];piso=km*ccd+cc;
+    document.getElementById('ccd').value=ccd.toFixed(4);
+    document.getElementById('cc').value=fmt(cc);
+    document.getElementById('pisoValor').textContent=fmt(piso);
+    document.getElementById('pisoFormula').textContent=`${km} km × R$ ${ccd.toFixed(4)} + R$ ${cc.toFixed(2)}`;
+  }else{
+    document.getElementById('ccd').value='—';
+    document.getElementById('cc').value='—';
+    document.getElementById('pisoValor').textContent='R$ —';
+    document.getElementById('pisoFormula').textContent=coefs===null?'Combinação não disponível':'Informe o KM';
+  }
+
+  // SEGUROS — cada um = 0,0003 × NF individualmente
+  const segRoubo=valorNF*0.0003;
+  const segAcidente=valorNF*0.0003;
+  const totalSeguros=segRoubo+segAcidente+segAdicional;
+  document.getElementById('seguroRoubo').value=fmt(segRoubo);
+  document.getElementById('seguroAcidente').value=fmt(segAcidente);
+  document.getElementById('totalSeguros').value=fmt(totalSeguros);
+
+  // FRETE MOTORISTA
+  const custoCombustivel=consumo>0?(km/consumo)*precoComb:0;
+  const freteMotorista=piso;
+  const contPatronal=isPF?freteMotorista*0.04:0; // (frete*0.20)*0.20 = frete*0.04
+  const totalMotorista=freteMotorista+contPatronal;
+  document.getElementById('custoCombustivel').value=fmt(custoCombustivel);
+  document.getElementById('freteMotorista').value=fmt(freteMotorista);
+  document.getElementById('hintFrete').textContent=isPF?'CPF — incide Patronal':'CNPJ — sem Patronal';
+  document.getElementById('contPatronal').value=fmt(contPatronal);
+  document.getElementById('totalMotorista').value=fmt(totalMotorista);
+
+  // CUSTOS OPERACIONAIS
+  const co_consulta=parseFloat(document.getElementById('co_consulta').value)||0;
+  const co_cadastro=parseFloat(document.getElementById('co_cadastro').value)||0;
+  const co_monitoramento=parseFloat(document.getElementById('co_monitoramento').value)||0;
+  const co_rastreamento=parseFloat(document.getElementById('co_rastreamento').value)||0;
+  const co_isca=parseFloat(document.getElementById('co_isca').value)||0;
+  const co_descargas=parseFloat(document.getElementById('co_descargas').value)||0;
+  const co_comissoes=parseFloat(document.getElementById('co_comissoes').value)||0;
+  const co_outras=parseFloat(document.getElementById('co_outras').value)||0;
+  document.getElementById('co_seguro').value=fmt(totalSeguros);
+  document.getElementById('co_frete').value=fmt(freteMotorista);
+  document.getElementById('co_patronal').value=fmt(contPatronal);
+  const custoOperacional=totalSeguros+freteMotorista+contPatronal
+    +co_consulta+co_cadastro+co_monitoramento+co_rastreamento
+    +co_isca+co_descargas+co_comissoes+co_outras;
+  document.getElementById('custoOperacionalTotal').value=fmt(custoOperacional);
+
+  // IMPOSTOS
+  const totalImpostosPct=pisCofinsPct+icmsPct;
+  document.getElementById('totalImpostosPct').value=fmtPct(totalImpostosPct);
+
+  // SECURITIZADORA — sobre o frete proposto (ou ideal se não preenchido)
+  const secTaxaPct=parseFloat(document.getElementById('secTaxaPct').value)||0;
+  const secBoleto=parseFloat(document.getElementById('secTaxaBoleto').value)||0;
+  const secOutras=parseFloat(document.getElementById('secOutrasTaxas').value)||0;
+  const baseParaSec=freteManual>0?freteManual:0;
+  let descSec=0;
+  if(hasSecuritizadora&&baseParaSec>0){
+    const descTaxaPct=baseParaSec*(secTaxaPct/100);
+    descSec=descTaxaPct+secBoleto+secOutras;
+    document.getElementById('secTotalDesc').textContent=fmt(descSec);
+    document.getElementById('secSubDetalhe').textContent=
+      `Taxa ${fmtPct(secTaxaPct)} sobre frete = ${fmt(descTaxaPct)}  ·  Boleto = ${fmt(secBoleto)}  ·  Outras = ${fmt(secOutras)}`;
+  }else if(hasSecuritizadora){
+    document.getElementById('secTotalDesc').textContent='R$ —';
+    document.getElementById('secSubDetalhe').textContent='Preencha o Frete Proposto para calcular o desconto';
+  }else{
+    document.getElementById('secTotalDesc').textContent='R$ —';
+    document.getElementById('secSubDetalhe').textContent='Antecipação desativada';
+  }
+
+  // FRETE IDEAL
+  const totalDesc=(totalImpostosPct+margemPct+ircsllPct)/100;
+  let freteIdeal=0,recLiquidoIdeal=0;
+  if(totalDesc<1&&custoOperacional>0){
+    freteIdeal=custoOperacional/(1-totalDesc);
+    const impostosI=freteIdeal*(totalImpostosPct/100);
+    const ircsllI=freteIdeal*(ircsllPct/100);
+    const secI=hasSecuritizadora?freteIdeal*(secTaxaPct/100)+secBoleto+secOutras:0;
+    recLiquidoIdeal=freteIdeal-custoOperacional-impostosI-ircsllI-secI;
+  }
+  document.getElementById('r_custoOp').textContent=fmt(custoOperacional);
+  document.getElementById('r_freteEmpresa').textContent=fmt(freteIdeal);
+  document.getElementById('r_recLiquido').textContent=fmt(recLiquidoIdeal);
+
+  // ANÁLISE FRETE PROPOSTO
+  const badge=document.getElementById('lucratividadeBadge');
+  if(freteManual>0){
+    const impostosM=freteManual*(totalImpostosPct/100);
+    const ircsllM=freteManual*(ircsllPct/100);
+    const secM=hasSecuritizadora?freteManual*(secTaxaPct/100)+secBoleto+secOutras:0;
+    const liquidoM=freteManual-custoOperacional-ircsllM-impostosM-secM;
+    const lucPctM=freteManual>0?(liquidoM/freteManual)*100:0;
+    document.getElementById('a_frete').textContent=fmt(freteManual);
+    document.getElementById('a_custos').textContent=fmt(custoOperacional);
+    document.getElementById('a_ircsll').textContent=fmt(ircsllM);
+    document.getElementById('a_impostos').textContent=fmt(impostosM);
+    document.getElementById('a_securitizadora').textContent=hasSecuritizadora?fmt(secM):'—';
+    document.getElementById('a_liquido').textContent=fmt(liquidoM);
+    const lucTag=document.getElementById('a_lucPct');
+    lucTag.textContent=fmtPct(lucPctM);
+    lucTag.className='tag '+(lucPctM>=8?'tag-green':lucPctM>=3?'tag-gold':'tag-red');
+    badge.textContent=fmtPct(lucPctM)+' de lucro';
+    const pisoStatus=document.getElementById('a_pisoStatus');
+    if(piso>0){
+      if(freteManual>=piso){pisoStatus.textContent='✓ Acima do piso ANTT ('+fmt(piso)+')';pisoStatus.style.color='var(--green)';}
+      else{pisoStatus.textContent='⚠ ABAIXO do piso ANTT ('+fmt(piso)+') — risco de multa!';pisoStatus.style.color='var(--red)';}
+    }else pisoStatus.textContent='';
+    const diffEl=document.getElementById('pisoDiff');
+    if(piso>0){
+      const diff=freteManual-piso;
+      diffEl.className='diff '+(diff>=0?'above':'below');
+      diffEl.textContent=(diff>=0?'+':'')+fmt(diff);
+    }
+  }else{
+    ['a_frete','a_custos','a_ircsll','a_impostos','a_securitizadora','a_liquido'].forEach(id=>{document.getElementById(id).textContent='—';});
+    document.getElementById('a_lucPct').textContent='—';
+    document.getElementById('a_lucPct').className='tag tag-gold';
+    document.getElementById('a_pisoStatus').textContent='';
+    document.getElementById('pisoDiff').textContent='—';
+    document.getElementById('pisoDiff').className='diff';
+    badge.textContent='—';
+  }
+  // atualiza gráfico sempre que calc() roda
+  if(typeof drawChart === 'function') drawChart();
+}
+
+// ═══════════════════════════
+// GRÁFICOS — Chart.js
+// ═══════════════════════════
+let chartInstance = null;
+let currentTab = 'composicao';
+
+// paleta alinhada com o tema
+const CORES = {
+  frete:     '#4a90d9',
+  seguro:    '#c9a84c',
+  patronal:  '#e8c97a',
+  impostos:  '#e74c3c',
+  ircsll:    '#e67e22',
+  sec:       '#f39c12',
+  lucro:     '#2ecc71',
+  custos:    '#8a92a0',
+  piso:      '#5a8dee',
+  ideal:     '#c9a84c',
+  proposto:  '#2ecc71',
+};
+
+function setChartTab(tab, el){
+  currentTab = tab;
+  document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  drawChart();
+}
+
+function parseFmt(id){
+  return parseFloat((document.getElementById(id).value||'').replace('R$ ','').replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function drawChart(){
+  const freteManual    = parseFloat(document.getElementById('freteEmpresaManual').value) || 0;
+  const custoOperacional = parseFmt('custoOperacionalTotal');
+  if(custoOperacional === 0 && freteManual === 0){
+    document.getElementById('chartCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('chartCard').style.display = 'block';
+
+  const totalImpostosPct = (parseFloat(document.getElementById('pisCofinsPct').value)||0)
+                         + (parseFloat(document.getElementById('icmsPct').value)||0);
+  const ircsllPct       = parseFloat(document.getElementById('ircsllPct').value)||0;
+  const margemPct       = parseFloat(document.getElementById('margemPct').value)||0;
+  const hasSecuritizadora = document.getElementById('hasSecuritizadora').checked;
+  const secTaxaPct      = parseFloat(document.getElementById('secTaxaPct').value)||0;
+  const secBoleto       = parseFloat(document.getElementById('secTaxaBoleto').value)||0;
+  const secOutras       = parseFloat(document.getElementById('secOutrasTaxas').value)||0;
+  const pisoTxt         = document.getElementById('pisoValor').textContent||'';
+  const piso            = parseFloat(pisoTxt.replace('R$ ','').replace(/\./g,'').replace(',','.')) || 0;
+
+  const totalDesc  = (totalImpostosPct + margemPct + ircsllPct)/100;
+  const freteIdeal = totalDesc < 1 && custoOperacional > 0 ? custoOperacional/(1-totalDesc) : 0;
+  const base       = freteManual > 0 ? freteManual : freteIdeal;
+  const impostosVal = base*(totalImpostosPct/100);
+  const ircsllVal   = base*(ircsllPct/100);
+  const secVal      = hasSecuritizadora ? base*(secTaxaPct/100)+secBoleto+secOutras : 0;
+  const lucroVal    = base - custoOperacional - impostosVal - ircsllVal - secVal;
+
+  const totalSeg   = parseFmt('totalSeguros');
+  const freteMotor = parseFmt('freteMotorista');
+  const patronal   = parseFmt('contPatronal');
+  const outrosCustos = Math.max(custoOperacional - totalSeg - freteMotor - patronal, 0);
+
+  // destruir instância anterior
+  if(chartInstance){ chartInstance.destroy(); chartInstance = null; }
+
+  Chart.defaults.color = '#8a92a0';
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.font.size = 11;
+
+  const canvasEl = document.getElementById('mainChart');
+  const legendEl = document.getElementById('chartLegend');
+  legendEl.innerHTML = '';
+
+  function addLeg(cor, label, val){
+    const pct = base > 0 ? ((val/base)*100).toFixed(1) : '0.0';
+    legendEl.innerHTML += `
+      <div class="leg-item" style="display:flex;align-items:center;gap:7px;">
+        <div style="width:10px;height:10px;border-radius:3px;background:${cor};flex-shrink:0;"></div>
+        <span style="flex:1;font-size:11px;color:var(--text2);">${label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);">${fmt(val)}</span>
+        <span style="font-size:10px;color:var(--text3);width:36px;text-align:right;">${pct}%</span>
+      </div>`;
+  }
+
+  const TT = {
+    backgroundColor:'#1a1e25', borderColor:'#2e3540',
+    borderWidth:1, titleColor:'#e8eaed',
+    bodyColor:'#8a92a0', padding:8,
+    titleFont:{size:11}, bodyFont:{size:11},
+  };
+
+  // ── TAB 1: DONUT ──
+  if(currentTab === 'composicao'){
+    const labels = ['Frete Motorista','Seguros','Cont. Patronal','Outros Custos','Impostos','IR+CSLL','Securitizadora','Lucro Líquido'];
+    const vals   = [freteMotor, totalSeg, patronal, outrosCustos, impostosVal, ircsllVal, secVal, Math.max(lucroVal,0)];
+    const cores  = [CORES.frete,CORES.seguro,CORES.patronal,CORES.custos,CORES.impostos,CORES.ircsll,CORES.sec,CORES.lucro];
+    const fl=[], fv=[], fc=[];
+    labels.forEach((l,i)=>{ if(vals[i]>0.01){fl.push(l);fv.push(vals[i]);fc.push(cores[i]);} });
+    const total = fv.reduce((a,b)=>a+b,0);
+
+    chartInstance = new Chart(canvasEl, {
+      type:'doughnut',
+      data:{ labels:fl, datasets:[{ data:fv, backgroundColor:fc, borderColor:'#13161b', borderWidth:2, hoverOffset:4 }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        cutout:'65%',
+        animation:{duration:400},
+        plugins:{
+          legend:{display:false},
+          tooltip:{ ...TT, callbacks:{ label: c => ` ${c.label}: ${fmt(c.parsed)} (${((c.parsed/total)*100).toFixed(1)}%)` } }
+        }
+      }
+    });
+    document.getElementById('chartBadge').textContent = `Total: ${fmt(base)}`;
+    fl.forEach((l,i) => addLeg(fc[i], l, fv[i]));
+  }
+
+  // ── TAB 2: BARRAS HORIZONTAIS ──
+  else if(currentTab === 'barras'){
+    const labels=[], vals=[], cores=[];
+    if(piso>0)            { labels.push('Piso ANTT');        vals.push(piso);             cores.push(CORES.piso);     }
+    if(freteIdeal>0)      { labels.push('Frete Ideal');      vals.push(freteIdeal);       cores.push(CORES.ideal);    }
+    if(freteManual>0)     { labels.push('Frete Proposto');   vals.push(freteManual);      cores.push(CORES.proposto); }
+    if(custoOperacional>0){ labels.push('Custo Operacional');vals.push(custoOperacional); cores.push(CORES.custos);   }
+
+    chartInstance = new Chart(canvasEl, {
+      type:'bar',
+      data:{ labels, datasets:[{ data:vals, backgroundColor:cores.map(c=>c+'bb'), borderColor:cores, borderWidth:1, borderRadius:4, borderSkipped:false }] },
+      options:{
+        indexAxis:'y',
+        responsive:true, maintainAspectRatio:false,
+        animation:{duration:400},
+        plugins:{
+          legend:{display:false},
+          tooltip:{ ...TT, callbacks:{ label: c => ` ${fmt(c.parsed.x)}` } }
+        },
+        scales:{
+          x:{ grid:{color:'#1e2530'}, ticks:{color:'#555e6e', font:{size:10}, callback:v=>'R$'+Math.round(v/1000)+'k'}, border:{display:false} },
+          y:{ grid:{display:false}, ticks:{color:'#8a92a0', font:{size:11}}, border:{display:false} }
+        }
+      }
+    });
+    document.getElementById('chartBadge').textContent = 'Comparativo';
+    labels.forEach((l,i) => addLeg(cores[i], l, vals[i]));
+  }
+
+  // ── TAB 3: GAUGE ──
+  else if(currentTab === 'gauge'){
+    const lucPct    = base > 0 ? (lucroVal/base)*100 : 0;
+    const shown     = Math.min(Math.max(lucPct, 0), 100);
+    const resto     = 100 - shown;
+    const corGauge  = lucPct >= 8 ? CORES.lucro : lucPct >= 3 ? CORES.seguro : CORES.impostos;
+
+    chartInstance = new Chart(canvasEl, {
+      type:'doughnut',
+      data:{
+        labels:['Lucro','Restante'],
+        datasets:[{ data:[shown, resto], backgroundColor:[corGauge, '#1e2530'], borderColor:[corGauge,'#252b35'], borderWidth:1, circumference:180, rotation:270, hoverOffset:0 }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        cutout:'72%',
+        animation:{duration:400},
+        plugins:{ legend:{display:false}, tooltip:{enabled:false} }
+      },
+      plugins:[{
+        id:'gaugeCenter',
+        afterDraw(chart){
+          const {ctx:c, chartArea:{top,left,width,height}} = chart;
+          const cx = left + width/2;
+          const cy = top + height * 0.88;
+          c.save();
+          c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillStyle = corGauge;
+          c.font = "600 26px 'DM Mono', monospace";
+          c.fillText(lucPct.toFixed(1)+'%', cx, cy - 8);
+          c.fillStyle = '#555e6e';
+          c.font = "11px 'DM Sans', sans-serif";
+          c.fillText('lucratividade', cx, cy + 14);
+          c.restore();
+        }
+      }]
+    });
+    document.getElementById('chartBadge').textContent = lucPct.toFixed(2)+'% lucro';
+    addLeg(corGauge, 'Lucro Líquido', lucroVal);
+    addLeg(CORES.custos, 'Custo Operacional', custoOperacional);
+    addLeg(CORES.impostos, 'Impostos + IR/CSLL', impostosVal+ircsllVal);
+    if(secVal > 0) addLeg(CORES.sec, 'Desc. Securitizadora', secVal);
+  }
+}
+
+function resetForm(){
+  ['origemInput','destinoInput'].forEach(id=>{document.getElementById(id).value='';});
+  ['km','valorNF','freteEmpresaManual','secTaxaPct'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('tempoRota').value='';
+  document.getElementById('secTaxaBoleto').value='0';
+  document.getElementById('secOutrasTaxas').value='0';
+  ['co_monitoramento','co_rastreamento','co_isca','co_descargas','co_comissoes','co_outras'].forEach(id=>{document.getElementById(id).value='0';});
+  document.getElementById('hasSecuritizadora').checked=false;
+  document.getElementById('isPF').checked=true;
+  document.getElementById('routeStatus').textContent='';
+  document.getElementById('routeStatus').className='route-status';
+  acCoords={origem:null,destino:null};
+  toggleSec();
+  calc();
+}
+
+calc();
+</script>
+</body>
+</html>
